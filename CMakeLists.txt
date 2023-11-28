@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.21)
 project(NetSim)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Symulacja_Sieci main.cpp)
+add_executable(NetSim main.cpp)
 
 set(PROJECT_ID NetSim)
 
@@ -16,16 +16,19 @@ include_directories(
 )
 
 set(SOURCE_FILES
-        src/NETSIM.cpp
+        src/package.cpp
 )
 
 add_executable(tsp ${SOURCE_FILES} main.cpp)
 
 set(SOURCES_FILES_TESTS
-        test/test_NETSIM.cpp
-        test/test_netsim_setup.cpp
-        include/types.hpp
-        include/package.hpp
+        test/test_Factory.cpp
+        test/test_factory_io.cpp
+        test/test_nodes.cpp
+        test/test_package.cpp
+        test/test_reports.cpp
+        test/test_simulate.cpp
+        test/test_storage_types.cpp
 )
 
 add_executable(NetSim_test ${SOURCE_FILES} ${SOURCES_FILES_TESTS} test/main_gtest.cpp)
