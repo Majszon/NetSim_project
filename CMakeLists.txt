@@ -3,13 +3,9 @@ project(NetSim)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(NetSim main.cpp)
-
 set(PROJECT_ID NetSim)
 
-set(CMAKE_CXX_STANDARD 17)
-
-add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors)
+add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors -Wconversion)
 
 include_directories(
         include
@@ -17,9 +13,10 @@ include_directories(
 
 set(SOURCE_FILES
         src/package.cpp
+        src/storage_types.cpp
 )
 
-add_executable(tsp ${SOURCE_FILES} main.cpp)
+add_executable(NetSim ${SOURCE_FILES} main.cpp)
 
 set(SOURCES_FILES_TESTS
         test/test_Factory.cpp
@@ -39,4 +36,8 @@ target_include_directories(NetSim_test PUBLIC
         mocks
 )
 
+add_subdirectory(googletest-master)
+
 target_link_libraries(NetSim_test gmock)
+
+
