@@ -1,22 +1,32 @@
 //
 // Created by HP on 28.11.2023.
 //
-#include "types.hpp"
-#include <set>
 #ifndef NETSIM_PACKAGE_HPP
 #define NETSIM_PACKAGE_HPP
-class Package{
+
+#include "types.hpp"
+#include <set>
+
+
+class Package {
 public:
-    Package(ElementID id): id(id_) {};
-    Package(Package &&);
-    Package & operator = (Package &&) : Package&;
+    Package();
 
-    ElementID get_id() const;
+    explicit Package(ElementID ID) : ID_(ID) { assigned_IDs.insert(ID_); }
 
-    ~Package() {};
+    Package(Package &&package)  noexcept : ID_(package.ID_) {}
+
+    Package &operator=(Package &&package) noexcept ;
+
+    ElementID get_id() const { return ID_; }
+
+    ~Package();
+
 private:
-    ElementID id_;
+    ElementID ID_;
     static std::set<ElementID> assigned_IDs;
     static std::set<ElementID> freed_IDs;
 };
+
+
 #endif //NETSIM_PACKAGE_HPP
