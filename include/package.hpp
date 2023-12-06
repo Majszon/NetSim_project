@@ -1,20 +1,19 @@
 //
 // Created by HP on 28.11.2023.
 //
-#include <set>
 #include "types.hpp"
+#include <set>
 #ifndef NETSIM_PACKAGE_HPP
 #define NETSIM_PACKAGE_HPP
 class Package{
 public:
-
-    Package();
-    Package(ElementID id): id_(id) {};
+    Package(ElementID id): id(id_) {};
     Package(Package &&);
-    ElementID get_id() const;
-    Package& operator = (Package&& other); //operator przypisania przenoszącego
-    ~Package();
+    Package & operator = (Package &&) : Package&;
 
+    ElementID get_id() const;
+
+    ~Package() {};
 private:
     ElementID id_;
     static std::set<ElementID> assigned_IDs;
