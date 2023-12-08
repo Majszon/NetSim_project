@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_ID NetSim)
 
-add_compile_options(-Wall -Wextra  -Wpedantic -pedantic -errors)
+add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors)
 
 include_directories(
         include
@@ -25,7 +25,7 @@ set(SOURCES_FILES_TESTS
         test/test_package.cpp
         #test/test_reports.cpp
         #test/test_simulate.cpp
-        #test/test_storage_types.cpp
+        test/test_storage_types.cpp
 )
 
 add_executable(NetSim_test ${SOURCE_FILES} ${SOURCES_FILES_TESTS} test/main_gtest.cpp)
@@ -40,4 +40,5 @@ add_subdirectory(googletest-master)
 
 target_link_libraries(NetSim_test gmock)
 
+target_compile_definitions(NetSim_test PUBLIC EXERCISE_ID=EXERCISE_ID_NODES)
 

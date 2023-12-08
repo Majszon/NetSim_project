@@ -1,3 +1,4 @@
+// 1: Bugajski (414889), Adamek (414896), Basiura (414817)
 //
 // Created by HP on 28.11.2023.
 //
@@ -12,21 +13,22 @@ class Package {
 public:
     Package();
 
-    explicit Package(ElementID ID) : ID_(ID) { assigned_IDs.insert(ID_); }
+    explicit Package(ElementID id) : id_(id) { assigned_IDs.insert(id_); }
 
-    Package(Package &&package)  noexcept : ID_(package.ID_) {}
+    Package(Package &&package)  noexcept : id_(package.id_) {}
 
     Package &operator=(Package &&package) noexcept ;
 
-    ElementID get_id() const { return ID_; }
+    ElementID get_id() const { return id_; }
 
     ~Package();
 
 private:
-    ElementID ID_;
+    ElementID id_;
     static std::set<ElementID> assigned_IDs;
     static std::set<ElementID> freed_IDs;
 };
 
 
 #endif //NETSIM_PACKAGE_HPP
+// 1: Bugajski (414889), Adamek (414896), Basiura (414817)
