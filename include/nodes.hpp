@@ -8,15 +8,19 @@
 
 #include "types.hpp"
 #include "storage_types.hpp"
+
+enum class ReceiverType{
+    Worker, Storehouse
+};
 class IPackageReceiver{
 public:
     virtual void receive_package(Package && p) = 0;
     virtual ElementID get_id(void) const = 0;
 
-    virtual IPackageStockPile::const_iterator begin() const = 0;
     virtual IPackageStockPile::const_iterator cbegin() const = 0;
-    virtual IPackageStockPile::const_iterator end() const = 0;
     virtual IPackageStockPile::const_iterator cend() const = 0;
+    virtual IPackageStockPile::const_iterator begin() const = 0;
+    virtual IPackageStockPile::const_iterator end() const = 0;
 
     virtual ~IPackageReceiver() = default;
 };
