@@ -3,8 +3,11 @@
 // Created by HP on 28.11.2023.
 //
 
+
 #ifndef NETSIM_TYPES_HPP
 #define NETSIM_TYPES_HPP
+#include <cstdlib>
+#include <functional>
 
 using ElementID = int;
 using Time = unsigned int;

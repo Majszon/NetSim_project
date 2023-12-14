@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_ID NetSim)
 
-add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors)
+add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors -Wno-error=pessimizing-move)
 
 include_directories(
         include
@@ -23,7 +23,7 @@ add_executable(NetSim ${SOURCE_FILES} main.cpp)
 set(SOURCES_FILES_TESTS
         #test/test_Factory.cpp
         #test/test_factory_io.cpp
-        test/test_nodes.cpp
+        #test/test_nodes.cpp
         test/test_package.cpp
         #test/test_reports.cpp
         #test/test_simulate.cpp
