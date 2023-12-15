@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_ID NetSim)
 
-add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors)
+add_compile_options(-Wall -Wextra -Werror -Wpedantic -pedantic -errors -Wno-error=pessimizing-move)
 
 include_directories(
         include
