@@ -14,7 +14,7 @@ enum PackageQueueType{
     LIFO
 };
 
-class IPackageStockPile{
+class IPackageStockpile{
 public:
 
     using const_iterator = std::list<Package>::const_iterator;
@@ -28,14 +28,15 @@ public:
     virtual const_iterator end() const = 0;
     virtual const_iterator cend() const = 0;
 
-    virtual ~IPackageStockPile() = default;
+    virtual ~IPackageStockpile() = default;
 };
 
-class IPackageQueue: public IPackageStockPile{
+class IPackageQueue: public IPackageStockpile{
+public:
+
     virtual Package pop() = 0;
     virtual PackageQueueType get_queue_type() const = 0;
 
-public:
     ~IPackageQueue() override = default;
 };
 class PackageQueue: public IPackageQueue{
