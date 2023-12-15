@@ -2,10 +2,10 @@
 //
 // Created by HP on 05.12.2023.
 //
-#include <list>
-#include "package.hpp"
 #ifndef NETSIM_STORAGE_TYPES_HPP
 #define NETSIM_STORAGE_TYPES_HPP
+#include <list>
+#include "package.hpp"
 
 enum PackageQueueType{
     FIFO,
@@ -36,6 +36,7 @@ class IPackageQueue: public IPackageStockpile{
 public:
     ~IPackageQueue() override = default;
 };
+
 class PackageQueue: public IPackageQueue{
 public:
     explicit PackageQueue(PackageQueueType queue_type) : queue_(), queue_type_(queue_type) {}

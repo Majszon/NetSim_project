@@ -7,11 +7,16 @@
 #ifndef NETSIM_NODES_HPP
 #define NETSIM_NODES_HPP
 
+#include "package.hpp"
+#include "config.hpp"
 #include "types.hpp"
 #include "storage_types.hpp"
 #include "helpers.hpp"
-#include <optional>
+#include <memory>
 #include <map>
+#include <optional>
+#include <utility>
+
 enum class ReceiverType{
     Worker, Storehouse
 };
@@ -38,11 +43,8 @@ public:
     explicit ReceiverPreferences(ProbabilityGenerator pg = probability_generator) : pg_(std::move(pg)) {}
 
     const_iterator cbegin() const { return preferences_.cbegin(); }
-
     const_iterator cend() const { return preferences_.cend(); }
-
     const_iterator begin() const { return preferences_.cbegin(); }
-
     const_iterator end() const { return preferences_.cend(); }
 
     void add_receiver(IPackageReceiver *r);
@@ -55,7 +57,6 @@ public:
 
 private:
     preferences_t preferences_;
-
     ProbabilityGenerator pg_;
 };
 
@@ -81,19 +82,69 @@ private:
     std::optional<Package> bufor_ = std::nullopt;
 };
 
+class Storehouse : public IPackageReceiver {
+public:
+    Storehouse(ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::FIFO)) : id_(id), d_(std::move(d)) {}
+
+    void receive_package(Package &&p) override;
+
+    ElementID get_id() const override { return id_; }
+
+    IPackageStockpile::const_iterator cbegin() const override { return std::cbegin(*d_);}
+    IPackageStockpile::const_iterator cend() const override { return std::begin(*d_); }
+    IPackageStockpile::const_iterator begin() const override { return std::cend(*d_); }
+    IPackageStockpile::const_iterator end() const override { return std::end(*d_); }
+
+    #if (defined EXERCISE_ID && EXERCISE_ID != EXERCISE_ID_NODES)
+        ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; }
+    #endif
+private:
+    ElementID id_;
+    std::unique_ptr<IPackageStockpile> d_;
+};
+
+class Worker : public IPackageReceiver, public PackageSender{
+public:
+    explicit Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q) : id_(id), pd_(pd), q_(std::move(q)) {}
+
+    void do_work(Time t);
+    TimeOffset get_processing_duration(void) const {return pd_;}
+    Time get_package_processing_start_time(void) const {return t_;}
+    ElementID get_id() const override {return id_;}
+
+    void receive_package(Package &&p) override {(*q_).push(std::move(p));}
+
+    IPackageStockpile::const_iterator cbegin() const override {return std::cbegin(*q_);}
+    IPackageStockpile::const_iterator begin() const override {return std::begin(*q_);}
+    IPackageStockpile::const_iterator cend() const override {return std::cend(*q_);}
+    IPackageStockpile::const_iterator end() const override {return std::end(*q_);}
+
+private:
+    ElementID id_;
+    TimeOffset pd_;
+    Time t_;
+    std::unique_ptr<IPackageQueue> q_;
+    std::optional<Package> bufor_ = std::nullopt;
+};
 
 class Ramp : public PackageSender{
 
 public:
+
     Ramp(ElementID id, TimeOffset di): PackageSender(), di_(di), id_(id) {}
 
+    TimeOffset get_delivery_interval() const { return di_; }
+
+    ElementID get_id() const { return id_; }
+
+    void deliver_goods(Time t);
 
 private:
     Time t_;
     TimeOffset di_;
+    std::optional<Package> bufor_ = std::nullopt;
     ElementID  id_;
-
 };
 
-
-
+#endif //NETSIM_NODES_HPP
+// 1: Bugajski (414889), Adamek (414896), Basiura (414817)
