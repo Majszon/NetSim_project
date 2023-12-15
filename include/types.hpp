@@ -6,6 +6,8 @@
 #ifndef NETSIM_TYPES_HPP
 #define NETSIM_TYPES_HPP
 
+#include <cstdlib>
+#include <functional>
 using ElementID = int;
 using Time = unsigned int;
 using TimeOffset = unsigned int;
