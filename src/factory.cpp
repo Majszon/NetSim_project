@@ -47,7 +47,10 @@ bool Factory::has_reachable_storehouse(const PackageSender* sender, std::map<con
         if (receiverPtr->get_receiver_type() == ReceiverType::STOREHOUSE) {
             hasStorehouse = true;
         } else {
-            hasStorehouse = hasStorehouse || has_reachable_storehouse(receiverPtr, node_colors);
+            auto* packageSenderPtr = dynamic_cast<const PackageSender*>(receiverPtr);
+            if (packageSenderPtr != nullptr) {
+                hasStorehouse = hasStorehouse || has_reachable_storehouse(packageSenderPtr, node_colors);
+            }
         }
     }
 
@@ -59,6 +62,7 @@ bool Factory::has_reachable_storehouse(const PackageSender* sender, std::map<con
 
     return true;
 }
+
 
 bool Factory::is_consistent() {
     std::map<const PackageSender*, NodeColor> nodeColors;
