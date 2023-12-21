@@ -91,4 +91,5 @@ void Worker::do_work(Time t) {
         }
     }
 }
+
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
