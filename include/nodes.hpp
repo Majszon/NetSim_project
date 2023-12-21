@@ -24,14 +24,16 @@ enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 class IPackageReceiver{
 public:
     virtual void receive_package(Package && p) = 0;
-    virtual ElementID get_id(void) const = 0;
-    virtual ReceiverType get_receiver_type() const = 0;
+    virtual ElementID get_id() const = 0;
+
     virtual IPackageStockpile::const_iterator cbegin() const = 0;
     virtual IPackageStockpile::const_iterator cend() const = 0;
     virtual IPackageStockpile::const_iterator begin() const = 0;
     virtual IPackageStockpile::const_iterator end() const = 0;
 
     virtual ~IPackageReceiver() = default;
+
+    virtual ReceiverType get_receiver_type() const = 0;
 
 };
 
@@ -40,11 +42,14 @@ public:
     void receive_package(Package && p) override;
     ElementID get_id() const override { return id_; }
     Storehouse( ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::FIFO)): id_(id), d_(std::move(d)){}
-    ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; } // Badanie spójności, klasa Factory
+
+
     IPackageStockpile::const_iterator begin() const override { return std::begin(*d_); }
     IPackageStockpile::const_iterator cbegin() const override { return std::cbegin(*d_); }
     IPackageStockpile::const_iterator end() const override { return std::end(*d_); }
     IPackageStockpile::const_iterator cend() const override { return std::cend(*d_); }
+
+    ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; } // Badanie spójności, klasa Factory
 
 private:
     ElementID id_;
@@ -104,11 +109,13 @@ private:
 class Worker : public IPackageReceiver, public PackageSender{
 public:
     explicit Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q) : id_(id), pd_(pd), q_(std::move(q)) {}
-    ReceiverType get_receiver_type() const override { return ReceiverType::WORKER; } // Badanie spójności, klasa Factory
+
     void do_work(Time t);
     TimeOffset get_processing_duration(void) const {return pd_;}
     Time get_package_processing_start_time(void) const {return t_;}
     ElementID get_id() const override {return id_;}
+
+    ReceiverType get_receiver_type() const override { return ReceiverType::WORKER; } // Badanie spójności, klasa Factory
 
     void receive_package(Package &&p) override {(*q_).push(std::move(p));}
 
