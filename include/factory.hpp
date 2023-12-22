@@ -63,7 +63,7 @@ public:
     void do_deliveries(Time t);
     void do_package_passing();
     bool is_consistent();
-    bool has_reachable_storehouse(const PackageSender* sender, std::map<const PackageSender*, NodeColor>& node_colors);
+
 
 private:
     NodeCollection<Ramp> ramp_;
@@ -71,6 +71,7 @@ private:
     NodeCollection<Storehouse> storehouse_;
     template <typename Node>
     void remove_receiver(NodeCollection<Node>&collection, ElementID id);
+    bool has_reachable_storehouse(const PackageSender* sender, std::map<const PackageSender*, NodeColor>& node_colors);
 };
 
 #endif //NETSIM_FACTORY_HPP

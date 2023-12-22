@@ -25,10 +25,16 @@ void Factory::do_deliveries(Time t) {
 }
 
 void Factory::do_package_passing() {
-
+    // Przekazywanie półproduktów od nadawcy do odbiorcy
+    for (auto& worker : worker_) {
+        if (worker.get_sending_buffer().has_value()) {
+            auto receiver = worker.receiver_preferences_.choose_receiver();
+            if (receiver != nullptr) {
+                receiver->receive_package((Package &&) std::move(worker.get_sending_buffer()));
+            }
+        }
+    }
 }
-
-
 
 // BADANIE SPOJNOŚCI
 
@@ -67,7 +73,6 @@ bool Factory::has_reachable_storehouse(const PackageSender* sender, std::map<con
     return true;
 }
 
-
 bool Factory::is_consistent() {
     std::map<const PackageSender*, NodeColor> nodeColors;
 
@@ -82,6 +87,7 @@ bool Factory::is_consistent() {
             has_reachable_storehouse(&worker, nodeColors);
         }
     }
+
     return true;
 }
 
