@@ -4,7 +4,10 @@
 
 template<typename Node>
 void Factory::remove_receiver(NodeCollection<Node> &collection, ElementID id) {
-
+    auto it = collection.find_by_id(id);
+    if (it != collection.end()) {
+        collection.remove_by_id(id);
+    }
 }
 
 void Factory::do_work(Time t) {
@@ -22,9 +25,10 @@ void Factory::do_deliveries(Time t) {
 }
 
 void Factory::do_package_passing() {
-    // Przekazywanie półproduktów
 
 }
+
+
 
 // BADANIE SPOJNOŚCI
 
@@ -80,5 +84,7 @@ bool Factory::is_consistent() {
     }
     return true;
 }
+
+
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
 
