@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
-
+#include <iostream>
 template <typename Node> class NodeCollection{
 public:
     using list = typename std::list<Node>;
@@ -80,19 +80,12 @@ private:
     void remove_receiver(NodeCollection<Storehouse>& collection, ElementID id);
 };
 enum class ElementType{
-    RAMP, WORKER, STOREHOUSE, LINK
+    RAMP, WORKER, STOREHOUSE, LINK, NONE
 };
-class ParsedLineData{
-public:
+struct ParsedLineData{
 
-    ParsedLineData() = default;
-    ParsedLineData(ElementType elementType, std::map<std::string, std::string> &&parameters) : type_(elementType), parse_parameters_(parameters) {}
-
-    ElementType get_element_type() const { return type_; }
-    std::map<std::string, std::string> get_parameters() const { return parse_parameters_; }
-private:
-    ElementType type_;
-    std::map<std::string,std::string> parse_parameters_;
+    ElementType TYPE;
+    std::map<std::string,std::string> parse_parameters;
 };
 
 ParsedLineData parse_line(std::string line);
