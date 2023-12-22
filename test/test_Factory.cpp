@@ -136,7 +136,7 @@ TEST(FactoryTest, RemoveWorkerTwoRemainingReceivers) {
     ASSERT_NE(it, prefs.end());
     EXPECT_DOUBLE_EQ(it->second, 1.0 / 2.0);
 
-    it = prefs.find(&(*(factory.find_worker_by_id(3))));
+     it = prefs.find(&(*(factory.find_worker_by_id(3))));
     ASSERT_NE(it, prefs.end());
     EXPECT_DOUBLE_EQ(it->second, 1.0 / 2.0);
 }
