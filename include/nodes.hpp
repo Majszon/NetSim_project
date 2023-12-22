@@ -23,7 +23,7 @@ enum class ReceiverType { // Badanie spójności, klasa Factory
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 class IPackageReceiver{
 public:
-    virtual void receive_package(Package && p) = 0;
+    virtual void receive_package(Package &&  p) = 0;
     virtual ElementID get_id() const = 0;
     virtual ReceiverType get_receiver_type() const = 0;
 
