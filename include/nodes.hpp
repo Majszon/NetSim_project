@@ -37,31 +37,6 @@ public:
 
 };
 
-class Storehouse: public IPackageReceiver{
-public:
-    explicit  Storehouse( ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::FIFO)): id_(id), d_(std::move(d)){}
-
-    void receive_package(Package && p) override;
-    ElementID get_id() const override { return id_; }
-
-    Storehouse(Storehouse&& storehouse) = default;
-
-    Storehouse(const Storehouse &storehouse) : id_(storehouse.get_id()) {}
-
-    Storehouse& operator=(const Storehouse &storehouse) noexcept { id_ = storehouse.get_id(); return *this;}
-
-    IPackageStockpile::const_iterator begin() const override { return std::begin(*d_); }
-    IPackageStockpile::const_iterator cbegin() const override { return std::cbegin(*d_); }
-    IPackageStockpile::const_iterator end() const override { return std::end(*d_); }
-    IPackageStockpile::const_iterator cend() const override { return std::cend(*d_); }
-
-    ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; } // Badanie spójności, klasa Factory
-    ~Storehouse()   = default;
-private:
-    ElementID id_;
-    std::unique_ptr<IPackageStockpile> d_;
-};
-
 class ReceiverPreferences {
 public:
     using preferences_t = std::map<IPackageReceiver *, double>;
@@ -101,6 +76,30 @@ private:
     std::optional<Package> bufor_ = std::nullopt;
 };
 
+class Storehouse: public IPackageReceiver{
+public:
+    explicit  Storehouse( ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::FIFO)): id_(id), d_(std::move(d)){}
+
+    void receive_package(Package && p) override {d_ ->push(std::move(p)); };
+    ElementID get_id() const override { return id_; }
+
+    Storehouse(Storehouse&& storehouse) = default;
+
+    Storehouse(const Storehouse &storehouse) : id_(storehouse.get_id()) {}
+
+    Storehouse& operator=(const Storehouse &storehouse) noexcept { id_ = storehouse.get_id(); return *this;}
+
+    IPackageStockpile::const_iterator begin() const override { return std::begin(*d_); }
+    IPackageStockpile::const_iterator cbegin() const override { return std::cbegin(*d_); }
+    IPackageStockpile::const_iterator end() const override { return std::end(*d_); }
+    IPackageStockpile::const_iterator cend() const override { return std::cend(*d_); }
+
+    ReceiverType get_receiver_type() const override { return ReceiverType::STOREHOUSE; } // Badanie spójności, klasa Factory
+    ~Storehouse()   = default;
+private:
+    ElementID id_;
+    std::unique_ptr<IPackageStockpile> d_;
+};
 
 class Ramp : public PackageSender{
 

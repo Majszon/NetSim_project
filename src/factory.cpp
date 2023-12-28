@@ -116,7 +116,6 @@ ParsedLineData parse_line(std::string line){
     std::string token;
     std::istringstream string_stream(line);
     std::vector<std::string> parametersKV;
-    ParsedLineData Parsed;
 
     while (std::getline(string_stream, token, ' ')){
         tokens.push_back(token);
@@ -131,109 +130,63 @@ ParsedLineData parse_line(std::string line){
     for(std::size_t i = 1; i < parametersKV.size(); i += 2){
         map.emplace(parametersKV[i], parametersKV[i+1]);
     }
-    if (parametersKV[0] == "RAMP"){
-        Parsed.TYPE = ElementType::RAMP;
-
-        std::istringstream id_stream(parametersKV[1]);
-        std::string id;
-        while(std::getline(id_stream, id, '=')){}
-        std::istringstream interval_stream(parametersKV[2]);
-        std::string interval;
-        while(std::getline(interval_stream,interval, '=')){}
-        Parsed.parse_parameters["id"] = id;
-        Parsed.parse_parameters["delivery-interval"] = interval;
-
-
+    if (parametersKV[0] == "LOADING_RAMP"){
+        return ParsedLineData(ElementType::RAMP, std::move(map));
     }
     else if (parametersKV[0] == "WORKER"){
-        Parsed.TYPE = ElementType::WORKER;
-
-        std::istringstream id_stream(parametersKV[1]);
-        std::string id;
-        while(std::getline(id_stream, id, '=')){}
-        std::istringstream time_stream(parametersKV[2]);
-        std::string time;
-        while(std::getline(time_stream, time, '=')){}
-        std::istringstream queue_stream(parametersKV[3]);
-        std::string queue;
-        while(std::getline(queue_stream, queue, '=')){}
-
-        Parsed.parse_parameters["id"] = id;
-        Parsed.parse_parameters["processing-time"] = time;
-        Parsed.parse_parameters["queue-type"] = queue;
+        return ParsedLineData(ElementType::WORKER, std::move(map));
     }
     else if (parametersKV[0] == "STOREHOUSE"){
-        Parsed.TYPE = ElementType::STOREHOUSE;
-
-        std::istringstream id_stream(parametersKV[1]);
-        std::string id;
-        while(std::getline(id_stream, id, '=')){}
-
-        Parsed.parse_parameters["id"] = id;
+        return ParsedLineData(ElementType::STOREHOUSE, std::move(map));
     }
     else if (parametersKV[0] == "LINK"){
-        Parsed.TYPE = ElementType::LINK;
-
-        std::istringstream src_stream(parametersKV[1]);
-        std::string src;
-        while(std::getline(src_stream, src, '=')){}
-        std::istringstream dest_stream(parametersKV[2]);
-        std::string dest;
-        while(std::getline(dest_stream, dest, '=')){}
-
-        Parsed.parse_parameters["src"] = src;
-        Parsed.parse_parameters["dest"] = dest;
+        return ParsedLineData(ElementType::LINK, std::move(map));
     }
-    else {
-        Parsed.TYPE = ElementType::NONE;
-    }
-
-    return Parsed;
+    else throw std::logic_error("Wrong element type.");
 }
 
-Factory load_factory_structure(std::istream& is){
+Factory load_factory_structure(std::istream& is) {
     Factory factory;
 
     std::string line;
-
     while (std::getline(is, line)) {
         if (line.empty() || line[0] == '#' || line[0] == ';') {
             continue;
         }
         ParsedLineData parsed_data = parse_line(line);
 
-        switch(parsed_data.TYPE){
+        switch(parsed_data.type_){
             case ElementType::RAMP: {
-                Ramp ramp(std::stoi(parsed_data.parse_parameters["id"]), std::stoi(parsed_data.parse_parameters["delivery-interval"]));
+                Ramp ramp(std::stoi(parsed_data.parse_parameters_["id"]), std::stoi(parsed_data.parse_parameters_["delivery-interval"]));
                 factory.add_ramp(std::move(ramp));
                 break;
             }
             case ElementType::WORKER: {
-                if(parsed_data.parse_parameters["queue-type"] == "FIFO"){
-                    Worker worker(std::stoi(parsed_data.parse_parameters["id"]),std::stoi(parsed_data.parse_parameters["processing-time"]),
+                if(parsed_data.parse_parameters_["queue-type"] == "FIFO"){
+                    Worker worker(std::stoi(parsed_data.parse_parameters_["id"]),std::stoi(parsed_data.parse_parameters_["processing-time"]),
                                   std::make_unique<PackageQueue>(PackageQueueType::FIFO));
                     factory.add_worker(std::move(worker));
                 }
-                if(parsed_data.parse_parameters["queue-type"] == "LIFO"){
-                    Worker worker(std::stoi(parsed_data.parse_parameters["id"]),std::stoi(parsed_data.parse_parameters["processing-time"]),
+                if(parsed_data.parse_parameters_["queue-type"] == "LIFO"){
+                    Worker worker(std::stoi(parsed_data.parse_parameters_["id"]),std::stoi(parsed_data.parse_parameters_["processing-time"]),
                                   std::make_unique<PackageQueue>(PackageQueueType::LIFO));
                     factory.add_worker(std::move(worker));
                 }
                 break;
             }
             case ElementType::STOREHOUSE:{
-                Storehouse storehouse(std::stoi(parsed_data.parse_parameters["id"]));
+                Storehouse storehouse(std::stoi(parsed_data.parse_parameters_["id"]));
                 factory.add_storehouse(std::move(storehouse));
                 break;
             }
             case ElementType::LINK:{
                 // src
-                std::istringstream src_stream(parsed_data.parse_parameters["src"]);
+                std::istringstream src_stream(parsed_data.parse_parameters_["src"]);
                 std::string src;
                 std::vector<std::string> src_v;
                 while(std::getline(src_stream,src,'-')){src_v.push_back(src);}
                 // dest
-                std::istringstream dest_stream(parsed_data.parse_parameters["dest"]);
+                std::istringstream dest_stream(parsed_data.parse_parameters_["dest"]);
                 std::string dest;
                 std::vector<std::string> dest_v;
                 while(std::getline(dest_stream,dest,'-')){dest_v.push_back(dest);}
@@ -319,13 +272,12 @@ void save_factory_structure(Factory& factory, std::ostream& os){
                 os << "store-" << rec.first->get_id() << "\n";
             }
         }
-        if(i==factory.worker_cend()-1){
+        if(i== --factory.worker_cend()){
             continue;
         }
         os << "\n";
     }
 
 }
-
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
 

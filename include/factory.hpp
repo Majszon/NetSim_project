@@ -11,20 +11,20 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+
 template <typename Node> class NodeCollection{
 public:
     using list = typename std::list<Node>;
     using iterator = typename list::iterator;
     using const_iterator = typename list::const_iterator;
 
-    NodeCollection() = default;
-    void add(Node&& node) { collection_.emplace_back(std::move(node)); }
+    void add(Node&& node) { collection_.push_back(std::move(node)); }
     void remove_by_id(ElementID id) {
         auto iter = find_by_id(id);
         if (iter != collection_.end()){
         collection_.erase(find_by_id(id)); }}
-    NodeCollection<Node>::iterator find_by_id(ElementID id) {return std::find_if(begin(), end(), [id](auto node){return node.get_id() == id; }); }
-    NodeCollection<Node>::const_iterator find_by_id(ElementID id) const {return std::find_if(cbegin(), cend(), [id](Node node){return node.get_id() == id; }); }
+    NodeCollection<Node>::iterator find_by_id(ElementID id) {return std::find_if(collection_.begin(), collection_.end(), [id](auto& node){return node.get_id() == id; }); }
+    NodeCollection<Node>::const_iterator find_by_id(ElementID id) const {return std::find_if(collection_.cbegin(), collection_.cend(), [id](const auto& node){return node.get_id() == id; }); }
 
 
     const_iterator cbegin() const { return collection_.cbegin(); }
@@ -35,7 +35,6 @@ public:
     iterator begin() { return collection_.begin(); }
     iterator end() { return collection_.end(); }
 
-    ~NodeCollection() = default;
 private:
     list collection_;
 };
@@ -82,10 +81,16 @@ private:
 enum class ElementType{
     RAMP, WORKER, STOREHOUSE, LINK, NONE
 };
-struct ParsedLineData{
+class ParsedLineData{
+public:
 
-    ElementType TYPE;
-    std::map<std::string,std::string> parse_parameters;
+    ParsedLineData(ElementType elementType, std::map<std::string, std::string> &&parameters) : type_(elementType), parse_parameters_(parameters) {}
+
+    ElementType get_element_type() const { return type_; }
+    std::map<std::string, std::string> get_parameters() const { return parse_parameters_; }
+
+    ElementType type_;
+    std::map<std::string,std::string> parse_parameters_;
 };
 
 ParsedLineData parse_line(std::string line);

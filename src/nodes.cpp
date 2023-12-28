@@ -61,9 +61,6 @@ IPackageReceiver *ReceiverPreferences::choose_receiver() {
     return nullptr;
 }
 
-void Storehouse::receive_package(Package &&p) {
-    d_ ->push(std::move(p));
-}
 
 void PackageSender::send_package() {
     IPackageReceiver *receiver;
