@@ -153,6 +153,8 @@ public:
     IPackageStockpile::const_iterator cend() const override {return std::cend(*q_);}
     IPackageStockpile::const_iterator end() const override {return std::end(*q_);}
 
+    const std::optional<Package> &get_processing_buffer() const {return bufor_;};
+
 private:
     ElementID id_;
     TimeOffset pd_;
@@ -160,5 +162,8 @@ private:
     std::unique_ptr<IPackageQueue> q_;
     std::optional<Package> bufor_ = std::nullopt;
 };
+
+
+
 #endif //NETSIM_NODES_HPP
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
