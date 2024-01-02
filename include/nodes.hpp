@@ -37,7 +37,6 @@ public:
 
 };
 
-inline bool my_compare(IPackageReceiver* x, IPackageReceiver* y) { return x->get_id() < y->get_id(); }
 
 class ReceiverPreferences {
 public:
