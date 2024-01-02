@@ -76,7 +76,7 @@ void generate_simulation_turn_report(const Factory& f, std::ostream& os, Time t)
             os << "(empty)";
         } else {
             for (const auto& package : *worker_queue) {
-                os << "#" << package.get_id() << ", ";
+                os << "#" << package.get_id();
             }
         }
         os << "\n";
@@ -102,21 +102,12 @@ void generate_simulation_turn_report(const Factory& f, std::ostream& os, Time t)
             os << "(empty)";
         } else {
             for (const auto& package : storehouse) {
-                os << "#" << package.get_id() << ", ";
+                os << "#" << package.get_id();
             }
         }
-        os << "\n";
+        os << "\n\n";
     }
 }
-
-
-
-
-
-
-
-
-
 
 
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
