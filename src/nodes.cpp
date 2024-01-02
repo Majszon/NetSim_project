@@ -18,24 +18,24 @@ Ramp& Ramp::operator=(const Ramp &ramp) noexcept{
 }
 
 void ReceiverPreferences::add_receiver(IPackageReceiver *r) {
-    double num_of_receivers_begin = double(preferences_.size());
+    std::size_t num_of_receivers_begin = preferences_.size();
     if(num_of_receivers_begin == 0){
         preferences_[r] = 1.0;
     }
     else{
         for(auto &rec : preferences_){
-            rec.second= 1/(num_of_receivers_begin + 1);
+            rec.second= 1.0/(double(num_of_receivers_begin + 1));
         }
-        preferences_[r] = 1/(num_of_receivers_begin + 1);
+        preferences_[r] = 1.0/(double(num_of_receivers_begin + 1));
     }
 }
 
 void ReceiverPreferences::remove_receiver(IPackageReceiver *r) {
-    double num_of_receivers_begin = double(preferences_.size());
+    std::size_t num_of_receivers_begin = preferences_.size();
     if(num_of_receivers_begin > 1){
         for(auto &rec : preferences_){
             if(rec.first != r){
-                rec.second = 1/(num_of_receivers_begin - 1);
+                rec.second = 1.0/(double(num_of_receivers_begin - 1));
             }
         }
     }
@@ -103,15 +103,22 @@ Worker& Worker::operator=(const Worker &worker) noexcept {
 }
 
 void Worker::do_work(Time t) {
-    if (!std::empty(*q_) && !bufor_ ) {
+    if (!q_->empty() && !bufor_ ) {
         bufor_.emplace(q_->pop());
         t_ = t;
-    }
-    else {
         if (t - t_ + 1 == pd_) {
             push_package(Package(bufor_.value().get_id()));
             bufor_.reset();
-            if (!std::empty(*q_)) {
+            if (!q_->empty()) {
+                bufor_.emplace(q_->pop());
+            }
+        }
+    }
+    else{
+        if (t - t_ + 1 == pd_) {
+            push_package(Package(bufor_.value().get_id()));
+            bufor_.reset();
+            if (!q_->empty()) {
                 bufor_.emplace(q_->pop());
             }
         }

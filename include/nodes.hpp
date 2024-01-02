@@ -23,7 +23,7 @@ enum class ReceiverType { // Badanie spójności, klasa Factory
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 class IPackageReceiver{
 public:
-    virtual void receive_package(Package &&  p) = 0;
+    virtual void receive_package(Package &&p) = 0;
     virtual ElementID get_id() const = 0;
     virtual ReceiverType get_receiver_type() const = 0;
 
@@ -33,9 +33,11 @@ public:
     virtual IPackageStockpile::const_iterator begin() const = 0;
     virtual IPackageStockpile::const_iterator end() const = 0;
 
-    virtual ~IPackageReceiver() = default;
+    ~IPackageReceiver() = default;
 
 };
+
+inline bool my_compare(IPackageReceiver* x, IPackageReceiver* y) { return x->get_id() < y->get_id(); }
 
 class ReceiverPreferences {
 public:
@@ -44,8 +46,8 @@ public:
 
     explicit ReceiverPreferences( ProbabilityGenerator pg = probability_generator) : pg_(std::move(pg)){};
 
-    void add_receiver( IPackageReceiver* r);
-    void remove_receiver( IPackageReceiver* r);
+    void add_receiver( IPackageReceiver *r);
+    void remove_receiver( IPackageReceiver *r);
 
     const_iterator cbegin() const {return preferences_.cbegin(); }
     const_iterator begin() const {return preferences_.begin(); }
@@ -65,14 +67,13 @@ class PackageSender{
 public:
     ReceiverPreferences receiver_preferences_; // obiekt preferencji odbiorcy (dla uproszczenia – jako pole publiczne)
     PackageSender() = default; //konstruktor domyślny
-    PackageSender(PackageSender&&) = default; //konstruktor przenoszący (domyślny)
+    PackageSender(PackageSender &&package_sender) = default; //konstruktor przenoszący (domyślny)
     void send_package(); //metoda do wysyłania produktu
     const std::optional<Package> &get_sending_buffer() const {return bufor_;}; //bufor produktu
 
     ~PackageSender() = default;
 protected:
     void push_package(Package &&package);
-private:
     std::optional<Package> bufor_ = std::nullopt;
 };
 
@@ -138,7 +139,7 @@ public:
 
     void do_work(Time t);
 
-    IPackageQueue* get_queue() const { return q_.get(); }
+    IPackageQueue *get_queue() const { return q_.get(); }
 
     TimeOffset get_processing_duration(void) const {return pd_;}
     Time get_package_processing_start_time(void) const {return t_;}

@@ -18,7 +18,7 @@ public:
     using iterator = typename list::iterator;
     using const_iterator = typename list::const_iterator;
 
-    void add(Node&& node) { collection_.push_back(std::move(node)); }
+    void add(Node&& node) { collection_.emplace_back(std::move(node)); }
     void remove_by_id(ElementID id) {
         auto iter = find_by_id(id);
         if (iter != collection_.end()){

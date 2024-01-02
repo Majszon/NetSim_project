@@ -16,13 +16,20 @@ std::string receiver_type_to_string(ReceiverType type) {
 void generate_structure_report(const Factory& f, std::ostream& os) {
     os << "\n== LOADING RAMPS ==\n\n";
     for (auto it = f.ramp_cbegin(); it != f.ramp_cend(); ++it) {
-        const auto &ramp = *it;
+        const auto& ramp = *it;
         os << "LOADING RAMP #" << ramp.get_id() << "\n";
         os << "  Delivery interval: " << ramp.get_delivery_interval() << "\n";
         os << "  Receivers:\n";
 
-        for (const auto& receiver : ramp.receiver_preferences_.get_preferences()) {
-            os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #" << receiver.first->get_id() << "\n";
+        std::size_t worker_id_counter = 1;
+        while (worker_id_counter < ramp.receiver_preferences_.get_preferences().size() + 1) {
+            for (const auto& receiver: ramp.receiver_preferences_.get_preferences()) {
+                if (receiver.first->get_id() == ElementID(worker_id_counter)) {
+                    os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #"
+                       << receiver.first->get_id() << "\n";
+                }
+            }
+            worker_id_counter += 1;
         }
         os << "\n";
     }
@@ -39,8 +46,15 @@ void generate_structure_report(const Factory& f, std::ostream& os) {
             os << "  Queue type: LIFO\n";
         }
         os << "  Receivers:\n";
-        for (const auto& receiver : worker.receiver_preferences_.get_preferences()) {
-            os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #" << receiver.first->get_id() << "\n";
+        std::size_t storehouse_id_counter = 1;
+        while (storehouse_id_counter < worker.receiver_preferences_.get_preferences().size() + 1) {
+            for (const auto& receiver: worker.receiver_preferences_.get_preferences()) {
+                if (receiver.first->get_id() == ElementID(storehouse_id_counter)) {
+                    os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #"
+                       << receiver.first->get_id() << "\n";
+                }
+            }
+            storehouse_id_counter += 1;
         }
         os << "\n";
     }
@@ -57,57 +71,72 @@ void generate_simulation_turn_report(const Factory& f, std::ostream& os, Time t)
     os << "=== [ Turn: " << t << " ] ===\n\n";
 
     os << "== WORKERS ==\n\n";
-    for (auto it = f.worker_cbegin(); it != f.worker_cend(); ++it) {
+    for (auto it = f.worker_cbegin(); it != f.worker_cend(); it++) {
         const auto& worker = *it;
         os << "WORKER #" << worker.get_id() << "\n";
 
         os << "  PBuffer: ";
-        if (!worker.get_processing_buffer().has_value()) {
-            os << "(empty)";
-        } else {
+        if (worker.get_processing_buffer().has_value() ) {
             const auto& processing_buffer = worker.get_processing_buffer().value();
-            os << "#" << processing_buffer.get_id() << " (pt = " << worker.get_processing_duration() << ")";
+            os << "#" << processing_buffer.get_id() << " (pt = " << 1 + t - worker.get_package_processing_start_time() << ")";
+        } else {
+            os << "(empty)";
         }
         os << "\n";
 
         os << "  Queue: ";
         const auto& worker_queue = worker.get_queue();
+        std::size_t size = worker_queue->size();
         if (worker_queue->empty()) {
             os << "(empty)";
         } else {
-            for (const auto& package : *worker_queue) {
-                os << "#" << package.get_id() << ", ";
+            std::size_t counter = 0;
+            for (const auto& package: *worker_queue) {
+                if (size == 1 || counter == size - 1) {
+                    os << "#" << package.get_id();
+                }
+                else{
+                        os << "#" << package.get_id() << ", ";
+                    }
+                }
+                counter++;
             }
-        }
+
         os << "\n";
 
         os << "  SBuffer: ";
-        if (!worker.get_sending_buffer().has_value()) {
+        if (!worker.get_sending_buffer()) {
             os << "(empty)";
         } else {
-            const auto& sending_buffer = worker.get_sending_buffer().value();
-            os << "#" << sending_buffer.get_id();
+            os << "#" << worker.get_sending_buffer()->get_id();
         }
-        os << "\n";
+        os << "\n\n";
     }
 
-    os << "\n\n== STOREHOUSES ==\n";
+    os << "\n== STOREHOUSES ==\n";
     for (auto it = f.storehouse_cbegin(); it != f.storehouse_cend(); ++it) {
         const auto& storehouse = *it;
         os << "\nSTOREHOUSE #" << storehouse.get_id() << "\n";
 
         // Display Stock information
         os << "  Stock: ";
+
         if (storehouse.cbegin() == storehouse.cend()) {
             os << "(empty)";
         } else {
-            for (const auto& package : storehouse) {
-                os << "#" << package.get_id() << ", ";
+            for (auto iter = storehouse.cbegin(); iter != storehouse.cend(); ++iter) {
+                const auto& package = *iter;
+                if (iter == std::prev(storehouse.cend())){
+                    os << "#" << package.get_id();
+                }
+                else {
+                    os << "#" << package.get_id() << ", ";
+                }
             }
+            }
+            os << "\n\n";
         }
-        os << "\n";
     }
-}
 
 
 
@@ -120,4 +149,3 @@ void generate_simulation_turn_report(const Factory& f, std::ostream& os, Time t)
 
 
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
-
