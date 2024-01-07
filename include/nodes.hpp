@@ -20,6 +20,10 @@ enum class ReceiverType { // Badanie spójności, klasa Factory
     WORKER,
     STOREHOUSE
 };
+
+
+
+
 enum class NodeColor { UNVISITED, VISITED, VERIFIED };
 class IPackageReceiver{
 public:
@@ -80,6 +84,10 @@ class Storehouse: public IPackageReceiver{
 public:
     explicit  Storehouse( ElementID id, std::unique_ptr<IPackageStockpile> d = std::make_unique<PackageQueue>(PackageQueueType::FIFO)): id_(id), d_(std::move(d)){}
 
+    static bool sortById(const Storehouse& a, const Storehouse& b) {
+        return a.get_id() < b.get_id();
+    }
+
     void receive_package(Package && p) override {d_ ->push(std::move(p)); };
     ElementID get_id() const override { return id_; }
 
@@ -127,6 +135,10 @@ private:
 class Worker : public IPackageReceiver, public PackageSender{
 public:
     explicit Worker(ElementID id, TimeOffset pd, std::unique_ptr<IPackageQueue> q) : id_(id), pd_(pd), q_(std::move(q)) {}
+
+    static bool sortById(const Worker& a, const Worker& b) {
+        return a.get_id() < b.get_id();
+    }
 
     Worker() = default;
 

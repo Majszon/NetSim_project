@@ -1,6 +1,7 @@
 // 1: Bugajski (414889), Adamek (414896), Basiura (414817)
 
 #include <reports.hpp>
+#include <algorithm>
 
 std::string receiver_type_to_string(ReceiverType type) {
     switch (type) {
@@ -17,51 +18,93 @@ void generate_structure_report(const Factory& f, std::ostream& os) {
     os << "\n== LOADING RAMPS ==\n\n";
     for (auto it = f.ramp_cbegin(); it != f.ramp_cend(); ++it) {
         const auto& ramp = *it;
+
         os << "LOADING RAMP #" << ramp.get_id() << "\n";
         os << "  Delivery interval: " << ramp.get_delivery_interval() << "\n";
         os << "  Receivers:\n";
 
-        std::size_t worker_id_counter = 1;
-        while (worker_id_counter < ramp.receiver_preferences_.get_preferences().size() + 1) {
-            for (const auto& receiver: ramp.receiver_preferences_.get_preferences()) {
-                if (receiver.first->get_id() == ElementID(worker_id_counter)) {
-                    os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #"
-                       << receiver.first->get_id() << "\n";
-                }
+        std::vector<ElementID> receiver_worker;
+        std::vector<ElementID> receiver_storehouse;
+        for (const auto& receiver: ramp.receiver_preferences_.get_preferences()) {
+            if (receiver.first->get_receiver_type() == ReceiverType::STOREHOUSE) {
+                receiver_storehouse.push_back(receiver.first->get_id());
             }
-            worker_id_counter += 1;
+            if ((receiver.first->get_receiver_type()) == ReceiverType::WORKER) {
+                receiver_worker.push_back(receiver.first->get_id());
+            }
+        }
+
+        std::sort(receiver_storehouse.begin(), receiver_storehouse.end());
+        std::sort(receiver_worker.begin(), receiver_worker.end());
+
+        if(!receiver_storehouse.empty()){
+            for (auto& elem : receiver_storehouse){
+                os << "    storehouse" << " #" << elem << "\n";
+            }
+        }
+        if(!receiver_worker.empty()){
+            for (auto& elem : receiver_worker){
+                os << "    worker" << " #" << elem << "\n";
+            }
         }
         os << "\n";
     }
 
     os << "\n== WORKERS ==\n\n";
+    std::vector<Worker> worker_vector;
     for (auto it = f.worker_cbegin(); it != f.worker_cend(); ++it) {
         const auto& worker = *it;
-        os << "WORKER #" << worker.get_id() << "\n";
-        os << "  Processing time: " << worker.get_processing_duration() << "\n";
-        if(worker.get_queue()->get_queue_type() == PackageQueueType::FIFO){
+        worker_vector.push_back(worker);
+    }
+        std::sort(worker_vector.begin(), worker_vector.end(), Worker::sortById);
+        for(auto& worker_sorted : worker_vector){
+            std::vector<ElementID> w_sort_storehouse;
+            std::vector<ElementID> w_sort_worker;
+
+        os << "WORKER #" << worker_sorted.get_id() << "\n";
+        os << "  Processing time: " << worker_sorted.get_processing_duration() << "\n";
+        if(worker_sorted.get_queue()->get_queue_type() == PackageQueueType::FIFO){
             os << "  Queue type: FIFO\n";
         }
-        else if(worker.get_queue()->get_queue_type() == PackageQueueType::LIFO){
+        else if(worker_sorted.get_queue()->get_queue_type() == PackageQueueType::LIFO){
             os << "  Queue type: LIFO\n";
         }
         os << "  Receivers:\n";
-        std::size_t storehouse_id_counter = 1;
-        while (storehouse_id_counter < worker.receiver_preferences_.get_preferences().size() + 1) {
-            for (const auto& receiver: worker.receiver_preferences_.get_preferences()) {
-                if (receiver.first->get_id() == ElementID(storehouse_id_counter)) {
-                    os << "    " << receiver_type_to_string(receiver.first->get_receiver_type()) << " #"
-                       << receiver.first->get_id() << "\n";
+
+
+        for (auto& receiver: worker_sorted.receiver_preferences_.get_preferences()) {
+            if (receiver.first->get_receiver_type() == ReceiverType::STOREHOUSE) {
+                w_sort_storehouse.push_back(receiver.first->get_id());
+            }
+            if (receiver.first->get_receiver_type() == ReceiverType::WORKER) {
+                w_sort_worker.push_back(receiver.first->get_id());
+            }
+        }
+            std::sort(w_sort_storehouse.begin(),w_sort_storehouse.end());
+            std::sort(w_sort_worker.begin(),w_sort_worker.end());
+
+            if(!w_sort_storehouse.empty()){
+                for (auto& elem : w_sort_storehouse){
+                    os << "    storehouse" << " #" << elem << "\n";
                 }
             }
-            storehouse_id_counter += 1;
-        }
+            if(!w_sort_worker.empty()){
+                for(auto& elem : w_sort_worker){
+                    os << "    worker" << " #" << elem << "\n";
+                }
+            }
         os << "\n";
     }
 
+
     os << "\n== STOREHOUSES ==\n\n";
+        std::vector<Storehouse> storehouse_vector;
     for(auto i = f.storehouse_cbegin(); i != f.storehouse_cend(); ++i) {
-        const auto &storehouse = *i;
+        const auto& storehouse = *i;
+        storehouse_vector.push_back(storehouse);
+    }
+    std::sort(storehouse_vector.begin(), storehouse_vector.end(), Storehouse::sortById);
+    for (const auto& storehouse : storehouse_vector){
         os << "STOREHOUSE #" << storehouse.get_id() << "\n\n";
     }
 }
